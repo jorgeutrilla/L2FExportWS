@@ -9,11 +9,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccess", "DataAccess\Da
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Business", "Business\Business.csproj", "{6F002056-4F8B-40CB-9FE3-BCE70E456F89}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestProject1", "UnitTestProject1\UnitTestProject1.csproj", "{538322F9-1FC9-4D31-AA92-E5215D1459A7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestWS", "UnitTestProject1\UnitTestWS.csproj", "{538322F9-1FC9-4D31-AA92-E5215D1459A7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API", "API\API.csproj", "{EB22F144-9719-4F71-9E5D-3ACD5D035D7A}"
 EndProject
-Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "ExportDashboard", "MobileClient\ExportDashboard", "{EA2ADFE2-657E-4C70-9ED2-9DFABBCEC21E}"
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "ExportDashboard", "MobileClient\ExportDashboard\", "{EA2ADFE2-657E-4C70-9ED2-9DFABBCEC21E}"
 	ProjectSection(WebsiteProperties) = preProject
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
 		Debug.AspNetCompiler.VirtualPath = "/localhost_9392"

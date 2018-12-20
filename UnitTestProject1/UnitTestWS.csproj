@@ -68,6 +68,7 @@
     <Compile Include="LocalBusiness\APIMethods.cs" />
     <Compile Include="LocalBusiness\DALMethods.cs" />
     <Compile Include="LocalModel\GetLastResult.cs" />
+    <Compile Include="LocalModel\ListProcessResult.cs" />
     <Compile Include="ServiceTest.cs" />
     <Compile Include="UnitTestWebAPI.cs" />
     <Compile Include="UnitTestDAL.cs" />

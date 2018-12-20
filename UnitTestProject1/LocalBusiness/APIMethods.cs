@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnitTestProject1.LocalModel;
 
 namespace UnitTestProject1.LocalBusiness
 {
@@ -103,6 +104,38 @@ namespace UnitTestProject1.LocalBusiness
             else if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
                 // success - update
+                return true;
+            }
+            else
+            {
+                // some error - error management
+                return false;
+            }
+        }
+
+        internal bool PostVentaPage(string ventaToPostJson, out ListProcessResult result)
+        {
+            result = null;
+            var client = new RestClient($"{_config.APIEndpoint}{_config.APIPostVentaDataRange}");
+            var postVenta = new RestRequest(Method.POST);
+            postVenta.AddHeader("cache-control", "no-cache");
+            if (null == TokenData || string.IsNullOrEmpty(TokenData.access_token))
+                throw new Exception("Token is null");
+
+            postVenta.AddHeader("Authorization", $"Bearer {TokenData.access_token}");
+            postVenta.AddHeader("Content-Type", "application/json");
+            postVenta.AddParameter("ventas", ventaToPostJson, ParameterType.RequestBody);
+            IRestResponse response = client.Execute(postVenta);
+            if (response.StatusCode == System.Net.HttpStatusCode.Created)
+            {
+                // success - creation
+                result = JsonConvert.DeserializeObject<ListProcessResult>(response.Content);
+                return true;
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                // success - update
+                result = JsonConvert.DeserializeObject<ListProcessResult>(response.Content);
                 return true;
             }
             else

@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using RestSharp;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,7 +17,8 @@ namespace WebAPITest
     {
         private readonly string _api_root_endpoint = "http://localhost:53986";
         private readonly string _token_endpoint = "/token";
-        private readonly string _ventas_endpoint = "/api/ventas";
+        private readonly string _ventas_endpoint = "/api/ventas/simple";
+        private readonly string _ventas_endpoint_bloque = "/api/ventas/bloque";
 
         private Token _token = null;
 
@@ -138,7 +140,7 @@ namespace WebAPITest
                 await TestCallToken();
             postVenta.AddHeader("Authorization", $"Bearer {_token.access_token}");
             postVenta.AddHeader("Content-Type", "application/json");
-            postVenta.AddParameter("undefined", ventaToPostJson, ParameterType.RequestBody);
+            postVenta.AddParameter("venta", ventaToPostJson, ParameterType.RequestBody);
             IRestResponse response = client.Execute(postVenta);
             if (response.StatusCode == System.Net.HttpStatusCode.Created)
             {
@@ -163,6 +165,122 @@ namespace WebAPITest
         }
 
 
+        [TestMethod]
+        public async Task TestPostListVenta()
+        {
+            var ventaList = new List<VentaDTO>
+            {
+                new VentaDTO
+                {
+                    CantidadVendida = 10,
+                    CodLaboratorio = "E0644",
+                    CodProducto = "874221",
+                    DescProducto = "OMEPRAZOL BEXAL 20 MG 28 CAPSULAS GASTRORRESISTE",
+                    EsGenerico = true,
+                    FechaVenta = DateTime.Parse("2018-12-14T10:42:31.6845383+01:00"),
+                    IdentificadorVenta = 0,
+                    IdLinea = 1,
+                    LoteOptimo = 42,
+                    NombreLaboratorio = "SANDOZ FARMACEUTICA S.A.",
+                    PVP = 16,
+                    StockActual = 150,
+                    StockMaximo = 1000,
+                    StockMinimo = 1,
+                    TipoVenta = "R"
+                },
+                new VentaDTO
+                {
+                    CantidadVendida = 10,
+                    CodLaboratorio = "E0644",
+                    CodProducto = "874221",
+                    DescProducto = "OMEPRAZOL BEXAL 20 MG 28 CAPSULAS GASTRORRESISTE",
+                    EsGenerico = true,
+                    FechaVenta = DateTime.Parse("2018-12-14T10:42:31.6845383+01:00"),
+                    IdentificadorVenta = 0,
+                    IdLinea = 2,
+                    LoteOptimo = 42,
+                    NombreLaboratorio = "SANDOZ FARMACEUTICA S.A.",
+                    PVP = 16,
+                    StockActual = 150,
+                    StockMaximo = 1000,
+                    StockMinimo = 1,
+                    TipoVenta = "R"
+                },
+                new VentaDTO
+                {
+                    CantidadVendida = 10,
+                    CodLaboratorio = "E0644",
+                    CodProducto = "874221",
+                    DescProducto = "OMEPRAZOL BEXAL 20 MG 28 CAPSULAS GASTRORRESISTE",
+                    EsGenerico = true,
+                    FechaVenta = DateTime.Parse("2018-12-14T10:42:31.6845383+01:00"),
+                    IdentificadorVenta = 0,
+                    IdLinea = 3,
+                    LoteOptimo = 42,
+                    NombreLaboratorio = "SANDOZ FARMACEUTICA S.A.",
+                    PVP = 16,
+                    StockActual = 150,
+                    StockMaximo = 1000,
+                    StockMinimo = 1,
+                    TipoVenta = "R"
+                },
+                new VentaDTO
+                {
+                    CantidadVendida = 10,
+                    CodLaboratorio = "E0644",
+                    CodProducto = "874221",
+                    DescProducto = "OMEPRAZOL BEXAL 20 MG 28 CAPSULAS GASTRORRESISTE",
+                    EsGenerico = true,
+                    FechaVenta = DateTime.Parse("2018-12-14T10:42:31.6845383+01:00"),
+                    IdentificadorVenta = 0,
+                    IdLinea = 4,
+                    LoteOptimo = 42,
+                    NombreLaboratorio = "SANDOZ FARMACEUTICA S.A.",
+                    PVP = 16,
+                    StockActual = 150,
+                    StockMaximo = 1000,
+                    StockMinimo = 1,
+                    TipoVenta = "R"
+                },
+            };
+
+            var ventaListJson = new
+            {
+                ventas = ventaList
+            };
+
+            string ventaToPostJson = JsonConvert.SerializeObject(ventaListJson);
+            var client = new RestClient($"{_api_root_endpoint}{_ventas_endpoint_bloque}");
+            var postVenta = new RestRequest(Method.POST);
+            postVenta.AddHeader("cache-control", "no-cache");
+            if (null == _token)
+                await TestCallToken();
+
+            postVenta.AddHeader("Authorization", $"Bearer {_token.access_token}");
+            postVenta.AddHeader("Content-Type", "application/json");
+            postVenta.AddParameter("ventas", ventaToPostJson, ParameterType.RequestBody);
+            IRestResponse response = client.Execute(postVenta);
+            if (response.StatusCode == System.Net.HttpStatusCode.Created)
+            {
+                // success - creation
+                Debug.WriteLine($"Created.");
+                var result = JsonConvert.DeserializeObject<ListProcessResult>(response.Content);
+                Debug.WriteLine($"Enviados {ventaList.Count} -> Creados: {result.Creations}; Actualizados {result.Updates}.");
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                // success - update
+                Debug.WriteLine($"Updated.");
+                var result = JsonConvert.DeserializeObject<ListProcessResult>(response.Content);
+                Debug.WriteLine($"Enviados {ventaList.Count} -> Creados: {result.Creations}; Actualizados {result.Updates}.");
+            }
+            else
+            {
+                // some error - error management
+                Debug.WriteLine($"ERROR: {response.ErrorMessage}");
+            }
+
+        }
 
 
         public async Task<Token> GetToken(RestRequest request)

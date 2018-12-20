@@ -79,6 +79,7 @@
       <Link>ExtRefs\VentaLineasDTO.cs</Link>
     </Compile>
     <Compile Include="BDInitializeTest.cs" />
+    <Compile Include="ListProcessResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CallingTest.cs" />
     <Compile Include="Tools\Token.cs" />

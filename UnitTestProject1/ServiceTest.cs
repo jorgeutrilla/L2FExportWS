@@ -2,7 +2,6 @@
 using Business.LocalModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
-using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -12,7 +11,6 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using UnitTestProject1.LocalBusiness;
-using UnitTestProject1.LocalModel;
 
 namespace UnitTestProject1
 {
@@ -48,7 +46,6 @@ namespace UnitTestProject1
             GetLastResult _lastExportDate;
 
             ConfigAndSetStartDateToRetrieve(configCS, daysResend, out timerTokenRefresh, out api, out _lastExportDate);
-
             DbCommand command = PrepareDbCommand(ref daysResend, _lastExportDate);
 
             //using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess)) // for long streams
@@ -76,7 +73,7 @@ namespace UnitTestProject1
                 throw new Exception($"DaysToResend config was not found or invalid, it must be a positive int");
 
             ConfigAndSetStartDateToRetrieve(
-                configCS, daysResend, 
+                configCS, daysResend,
                 out Stopwatch timerTokenRefresh, out APIMethods api, out GetLastResult _lastExportDate);
 
             DbCommand command = PrepareDbCommand(ref daysResend, _lastExportDate);
@@ -95,19 +92,36 @@ namespace UnitTestProject1
             }
 
             int ventaCount = ventaList.Count;
-            double pageSize = 10;
+            const double pageSize = 10;
             double pageTop = Math.Ceiling(ventaCount / pageSize);
             for (int page = 0; page < pageTop; page++)
             {
-                List<VentaDTO> ventaListPage = ventaList
-                    .GetRange(int.Parse((page * pageSize).ToString()), int.Parse(pageSize.ToString()));
-                var ventaListJson = new
+                List<VentaDTO> ventaListPage = null;
+                if (page == pageTop - 1)
                 {
-                    ventas = ventaList
+                    if (int.TryParse((ventaList.Count - (pageSize * (pageTop - 1))).ToString(), out int lastPageRecords))
+                    {
+                        ventaListPage = ventaList
+                            .GetRange(int.Parse((page * pageSize).ToString()), lastPageRecords);
+                    }
+                    else
+                    {
+                        throw new Exception("ERROR: Paging last page error on type conversion");
+                    }
+                }
+                else
+                {
+                    ventaListPage = ventaList
+                       .GetRange(int.Parse((page * pageSize).ToString()), int.Parse(pageSize.ToString()));
+                }
+
+                var ventaListJson = new VentaDTOBatch
+                {
+                    Ventas = ventaListPage
                 };
-                
+
                 SendVentaPage2API(timer, api, ventaListJson);
-                
+
             }
 
             timer.Stop();
@@ -115,17 +129,21 @@ namespace UnitTestProject1
             Debug.WriteLine($"Processing time: {timer.Elapsed.TotalSeconds} secs");
         }
 
-        private void SendVentaPage2API(Stopwatch timerTokenRefresh, APIMethods api, object ventaListJson)
+        private void SendVentaPage2API(Stopwatch timerTokenRefresh, APIMethods api, VentaDTOBatch ventaListJson)
         {
             string ventaToPostJson = JsonConvert.SerializeObject(ventaListJson);
             Debug.WriteLine($"Sending page of records: {ventaToPostJson}");
 
-            var done = api.PostVentaPage(ventaToPostJson, out ListProcessResult result);
-            if (done)
+            var done = api.PostVentaPage(ventaListJson, out ListProcessResult result);
+            if (!done)
             {
                 var msg = $"ERROR enviando ventas en paginas.";
                 Debug.WriteLine(msg);
                 throw new Exception(msg);
+            }
+            else
+            {
+                Debug.WriteLine($"Send result info - Creates: {result.Creations}; Updates: {result.Updates}");
             }
 
             if (timerTokenRefresh.Elapsed.TotalMinutes > 4)
@@ -230,7 +248,8 @@ namespace UnitTestProject1
                 APIPostVentaData = ConfigurationManager.AppSettings["APIPostVentaData"],
                 APIPostVentaDataRange = ConfigurationManager.AppSettings["APIPostVentaDataRange"],
                 APICodUsuario = ConfigurationManager.AppSettings["APICodUsuario"],
-                DaysToResend = daysResend
+                DaysToResend = daysResend,
+                UseAPIRangeMethod = bool.Parse(ConfigurationManager.AppSettings["UseAPIRangeMethod"])
             };
 
             // try webApi retrieve lastrecord to limit request

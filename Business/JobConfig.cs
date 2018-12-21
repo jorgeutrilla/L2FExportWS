@@ -17,6 +17,7 @@ namespace Business
         public string ProviderConnectionString { get; set; }
         public int DaysToResend { get; set; } = 1;
         public string APICodUsuario { get; set; }
+        public bool UseAPIRangeMethod { get; set; }
 
         public override string ToString()
         {
@@ -30,6 +31,7 @@ namespace Business
             strB.AppendLine($"API Auth Endpoint {APIEndpoint}/{JWTAuthRoute}");
             strB.AppendLine($"APIDataGetPostRoute {APIEndpoint}{APIGetVentaData}, {APIEndpoint}{APIPostVentaData}");
             strB.AppendLine($"DaysToResend {DaysToResend}");
+            strB.AppendLine($"Use API Range method {UseAPIRangeMethod}");
             retVal = strB.ToString();
             return retVal;
         }

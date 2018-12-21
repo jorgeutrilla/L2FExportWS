@@ -51,6 +51,8 @@ namespace UnitTestProject1
 
             var logDir = Path.Combine(Environment.GetFolderPath(SpecialFolder.CommonApplicationData),
                 "Makesoft", "Farmatic Export Data");
+            var executionLogFilePath = Path.Combine(logDir, $"datestamp_-exportjoblog.txt");
+
             if (!Directory.Exists(logDir)) Directory.CreateDirectory(logDir);
             job = new ExportJob("CS_FarmaticDB");
             using (TextWriter writer = new FileInfo(Path.Combine(logDir, "log.txt")).AppendText())
@@ -72,7 +74,8 @@ namespace UnitTestProject1
                     APIPostVentaData = ConfigurationManager.AppSettings["APIPostVentaData"],
                     APIPostVentaDataRange = ConfigurationManager.AppSettings["APIPostVentaDataRange"],
                     APICodUsuario = ConfigurationManager.AppSettings["APICodUsuario"],
-                    DaysToResend = daysResend
+                    DaysToResend = daysResend,                    
+                    UseAPIRangeMethod = bool.Parse(ConfigurationManager.AppSettings["UseAPIRangeMethod"])
                 };
 
                 writer.WriteLine(job.Config.ToString());

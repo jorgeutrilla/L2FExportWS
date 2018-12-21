@@ -52,8 +52,10 @@
     <Compile Include="Helpers\DALMethods.cs" />
     <Compile Include="JobConfig.cs" />
     <Compile Include="LocalModel\GetLastResult.cs" />
+    <Compile Include="LocalModel\ListProcessResult.cs" />
     <Compile Include="LocalModel\Token.cs" />
     <Compile Include="LocalModel\VentaDTO.cs" />
+    <Compile Include="LocalModel\VentaDTOBatch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

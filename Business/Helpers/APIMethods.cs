@@ -1,11 +1,8 @@
-﻿using Business;
-using Business.LocalModel;
+﻿using Business.LocalModel;
 using Newtonsoft.Json;
 using RestSharp;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Diagnostics;
 
 namespace Business.Helpers
 {
@@ -32,7 +29,7 @@ namespace Business.Helpers
                 TokenData = response.Data;
             else
                 throw new Exception($"ERROR ({response.StatusCode}): {response.ErrorMessage}: {response.Content}");
-            
+
         }
 
 
@@ -76,10 +73,8 @@ namespace Business.Helpers
             }
         }
 
-        internal bool PostVenta(VentaDTO venta)
+        public bool PostVenta(VentaDTO venta)
         {
-
-
             if (null == TokenData || string.IsNullOrEmpty(TokenData.access_token))
                 throw new Exception("Token is null");
 
@@ -102,6 +97,56 @@ namespace Business.Helpers
             else if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
                 // success - update
+                return true;
+            }
+            else
+            {
+                // some error - error management
+                return false;
+            }
+        }
+
+        public void PostVentaBatch(VentaDTOBatch ventaListJson)
+        {
+            string ventaToPostJson = JsonConvert.SerializeObject(ventaListJson);
+            Debug.WriteLine($"Sending page of records: {ventaToPostJson}");
+
+            var done = PostVentaPage(ventaListJson, out ListProcessResult result);
+            if (!done)
+            {
+                var msg = $"ERROR enviando ventas en paginas.";
+                Debug.WriteLine(msg);
+                throw new Exception(msg);
+            }
+            else
+            {
+                Debug.WriteLine($"Send result info - Creates: {result.Creations}; Updates: {result.Updates}");
+            }
+        }
+
+        private bool PostVentaPage(VentaDTOBatch ventaBatch, out ListProcessResult result)
+        {
+            result = null;
+            var client = new RestClient($"{_config.APIEndpoint}{_config.APIPostVentaDataRange}");
+            var postVenta = new RestRequest(Method.POST);
+            postVenta.AddHeader("cache-control", "no-cache");
+            if (TokenData == null || string.IsNullOrEmpty(TokenData.access_token))
+                throw new Exception("Token is null");
+
+            postVenta.AddHeader("Authorization", $"Bearer {TokenData.access_token}");
+            postVenta.AddHeader("Content-Type", "application/json");
+            postVenta.AddJsonBody(ventaBatch);
+            IRestResponse response = client.Execute(postVenta);
+            if (response.StatusCode == System.Net.HttpStatusCode.Created)
+            {
+                // success - creation
+                result = JsonConvert.DeserializeObject<ListProcessResult>(response.Content);
+                return true;
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                // success - update
+                result = JsonConvert.DeserializeObject<ListProcessResult>(response.Content);
                 return true;
             }
             else

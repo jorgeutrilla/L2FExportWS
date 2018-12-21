@@ -30,7 +30,8 @@ namespace UnitTestProject1
                 APIPostVentaData = "/api/ventas/single",
                 APIPostVentaDataRange = "/api/ventas/bloque",
                 DaysToResend = 20,
-                APICodUsuario = "ABCDS"
+                APICodUsuario = "ABCDS",                
+                UseAPIRangeMethod = false
             };
 
 

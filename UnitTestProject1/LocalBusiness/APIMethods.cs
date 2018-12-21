@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using UnitTestProject1.LocalModel;
+//using UnitTestProject1.LocalModel;
 
 namespace UnitTestProject1.LocalBusiness
 {
@@ -113,18 +113,18 @@ namespace UnitTestProject1.LocalBusiness
             }
         }
 
-        internal bool PostVentaPage(string ventaToPostJson, out ListProcessResult result)
+        internal bool PostVentaPage(VentaDTOBatch ventaBatch, out ListProcessResult result)
         {
             result = null;
             var client = new RestClient($"{_config.APIEndpoint}{_config.APIPostVentaDataRange}");
             var postVenta = new RestRequest(Method.POST);
             postVenta.AddHeader("cache-control", "no-cache");
-            if (null == TokenData || string.IsNullOrEmpty(TokenData.access_token))
+            if (TokenData == null || string.IsNullOrEmpty(TokenData.access_token))
                 throw new Exception("Token is null");
 
             postVenta.AddHeader("Authorization", $"Bearer {TokenData.access_token}");
             postVenta.AddHeader("Content-Type", "application/json");
-            postVenta.AddParameter("ventas", ventaToPostJson, ParameterType.RequestBody);
+            postVenta.AddJsonBody(ventaBatch);
             IRestResponse response = client.Execute(postVenta);
             if (response.StatusCode == System.Net.HttpStatusCode.Created)
             {
